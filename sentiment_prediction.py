@@ -7,9 +7,13 @@ from nltk.stem.snowball import SnowballStemmer
 from sklearn.model_selection import train_test_split
 from sklearn import svm
 from sklearn.metrics import accuracy_score, f1_score
+
 nltk.download('wordnet')
 wnl = nltk.WordNetLemmatizer()
-def create_dataset_from_splitted_news(sentiment_train, split_news_on_companies):
+
+
+def create_dataset_from_splitted_news(sentiment_train: pd.DataFrame,
+                                      split_news_on_companies) -> (list, list):
     X = []
     y = []
     for i in tqdm(range(len(sentiment_train))):
@@ -40,25 +44,33 @@ def create_dataset_from_splitted_news(sentiment_train, split_news_on_companies):
             y.append(sentiment_train.iloc[i].SentimentScore)
 
     return X, y
-def prepocess_text(text):
+
+
+def prepocess_text(text: str) -> str:
     from nltk.corpus import stopwords
     stopwords = set(stopwords.words('russian'))
     stemmer = SnowballStemmer("russian")
     text = re.sub(r'[0-9,.!;:]', '', text)
     stemmed_words = [stemmer.stem(word) for word in text.split()]
-    words_final = ' '.join([word for word in stemmed_words if word not in stopwords])
+    words_final = ' '.join(
+        [word for word in stemmed_words if word not in stopwords])
     return words_final
 
-def final_score(y_test, y_pred):
+
+def final_score(y_test: list, y_pred: list) -> float:
     f1 = f1_score(y_test, y_pred, average='weighted')
     accuracy = accuracy_score(y_test, y_pred)
     return (f1 + accuracy) / 2
 
-def learn_model(X, y):
+
+def learn_model(X: list, y: list) -> None:
     X_good = [prepocess_text(x) for x in X]
-    vectorizer = TfidfVectorizer(ngram_range=(1,2), max_features=1000) #max_features 10000
+    vectorizer = TfidfVectorizer(ngram_range=(1, 2),
+                                 max_features=1000)  # max_features 10000
     vectors = vectorizer.fit_transform(X_good)
-    X_train, X_test, y_train, y_test = train_test_split(vectors, y, test_size=0.2, random_state=69)
+    X_train, X_test, y_train, y_test = train_test_split(vectors, y,
+                                                        test_size=0.2,
+                                                        random_state=69)
     sv = svm.SVC()
     sv.fit(X_train, y_train)
 

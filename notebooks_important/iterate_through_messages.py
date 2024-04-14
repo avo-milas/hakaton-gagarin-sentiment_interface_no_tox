@@ -1,8 +1,11 @@
-from utils import *
+import re
+from utils import find_company_name, split_news_on_companies
 import math
+import pandas as pd
 
 
-def iterare(mes_to_ids, news_train, mes_to_index, dictionary_companies):
+def iterate(mes_to_ids: list, news_train: pd.DataFrame, mes_to_index: dict,
+            dictionary_companies: dict) -> None:
     succes = 0
     i = 0
 
@@ -19,14 +22,16 @@ def iterare(mes_to_ids, news_train, mes_to_index, dictionary_companies):
             continue
 
         company = dictionary_companies[news.issuerid]
-        company_names = company['EMITENT_FULL_NAME']
 
         company_tickers = [company['BGTicker']] + [company['OtherTicker']]
-        company_tickers = [x.split()[0] for x in company_tickers if not isinstance(x, float) or not math.isnan(x)]
+        company_tickers = [x.split()[0] for x in company_tickers if
+                           not isinstance(x, float) or not math.isnan(x)]
         text = news.MessageText
 
-        matches_tickers = re.findall(r'(?<=\$)\[A-Z]+|[A-Z]{4,6}', text)  # нашли тикеры
-        founded_tickers_by_name = find_company_name(text, dictionary_companies)  # тикеры по названиям
+        matches_tickers = re.findall(r'(?<=\$)\[A-Z]+|[A-Z]{4,6}',
+                                     text)  # нашли тикеры
+        founded_tickers_by_name = find_company_name(text,
+                                                    dictionary_companies)
 
         matches_tickers = set(matches_tickers) | set(founded_tickers_by_name)
 
@@ -34,9 +39,13 @@ def iterare(mes_to_ids, news_train, mes_to_index, dictionary_companies):
             companies_ids = mes_to_ids[mes_id]
             if 253 in companies_ids:
                 companies_ids.remove(253)
-            real_tickers = [dictionary_companies[id]['BGTicker'] for id in companies_ids] + [
-                dictionary_companies[id]['OtherTicker'] for id in companies_ids]
-            real_tickers = [x.split()[0] for x in real_tickers if not isinstance(x, float) or not math.isnan(x)]
+            real_tickers = [dictionary_companies[id]['BGTicker'] for id in
+                            companies_ids] + [
+                               dictionary_companies[id]['OtherTicker'] for id
+                               in
+                               companies_ids]
+            real_tickers = [x.split()[0] for x in real_tickers if
+                            not isinstance(x, float) or not math.isnan(x)]
 
             succes += len(set(real_tickers) & set(matches_tickers))
 
@@ -49,9 +58,9 @@ def iterare(mes_to_ids, news_train, mes_to_index, dictionary_companies):
 
 
 # не дописал, функция для сентимента (news_train)
-def iterare_and_give_sentiments(mes_to_ids, news_train, mes_to_index,
-                                dictionary_companies, all_tickers,
-                                dictionary_companies_by_ticker):
+def iterare_and_give_sentiments(mes_to_ids: dict, news_train, mes_to_index,
+                                dictionary_companies: dict, all_tickers,
+                                dictionary_companies_by_ticker: dict) -> None:
     succes = 0
     i = 0
 
@@ -67,24 +76,28 @@ def iterare_and_give_sentiments(mes_to_ids, news_train, mes_to_index,
             continue
 
         company = dictionary_companies[news.issuerid]
-        company_names = company['EMITENT_FULL_NAME']
 
         company_tickers = [company['BGTicker']] + [company['OtherTicker']]
-        company_tickers = [x.split()[0] for x in company_tickers if not isinstance(x, float) or not math.isnan(x)]
+        company_tickers = [x.split()[0] for x in company_tickers if
+                           not isinstance(x, float) or not math.isnan(x)]
         text = news.MessageText
 
-        sentences, companies_by_index = split_news_on_companies(text, dictionary_companies, all_tickers,
+        sentences, companies_by_index = split_news_on_companies(text,
+                                                                dictionary_companies,
+                                                                all_tickers,
                                                                 dictionary_companies_by_ticker)
 
-        # sentence - все предложения, companies_by_index - индексы предложений и компании в них
-        # если в 1 предложении 2 компании то гг, отсавляем 2 и прогноз делается сразу для двух
+        # sentence - все предложения, companies_by_index - индексы предложений
+        # если в 1 предложении 2 компании то гг, отсавляем 2 и прогноз для двух
 
-        # ВАШ КОД ЗДЕСЬ ##########################################################
+        # ВАШ КОД ЗДЕСЬ #######################################################
 
-        ########################################################################
+        #######################################################################
 
-        matches_tickers = re.findall(r'(?<=\$)\[A-Z]+|[A-Z]{4,6}', text)  # нашли тикеры
-        founded_tickers_by_name = find_company_name(text, dictionary_companies)  # тикеры по названиям
+        matches_tickers = re.findall(r'(?<=\$)\[A-Z]+|[A-Z]{4,6}',
+                                     text)  # нашли тикеры
+        founded_tickers_by_name = find_company_name(text,
+                                                    dictionary_companies)
 
         matches_tickers = set(matches_tickers) | set(founded_tickers_by_name)
 
@@ -92,9 +105,13 @@ def iterare_and_give_sentiments(mes_to_ids, news_train, mes_to_index,
             companies_ids = mes_to_ids[mes_id]
             if 253 in companies_ids:
                 companies_ids.remove(253)
-            real_tickers = [dictionary_companies[id]['BGTicker'] for id in companies_ids] + [
-                dictionary_companies[id]['OtherTicker'] for id in companies_ids]
-            real_tickers = [x.split()[0] for x in real_tickers if not isinstance(x, float) or not math.isnan(x)]
+            real_tickers = [dictionary_companies[id]['BGTicker'] for id in
+                            companies_ids] + [
+                               dictionary_companies[id]['OtherTicker'] for id
+                               in
+                               companies_ids]
+            real_tickers = [x.split()[0] for x in real_tickers if
+                            not isinstance(x, float) or not math.isnan(x)]
 
             succes += len(set(real_tickers) & set(matches_tickers))
 

@@ -11,11 +11,13 @@ EntityScoreType = tp.Tuple[int, float]  # (entity_id, entity_score)
 MessageResultType = tp.List[
     EntityScoreType
 ]  # list of entity scores,
+
+
 #    for example, [(entity_id, entity_score) for entity_id, entity_score in entities_found]
 
 
 def score_texts(
-    messages: tp.Iterable[str], *args, **kwargs
+        messages: tp.Iterable[str], *args, **kwargs
 ) -> tp.Iterable[MessageResultType]:
     """
     Main function (see tests for more clarifications)
@@ -39,7 +41,10 @@ def score_texts(
 
     for i in range(len(messages)):
         text = messages[i]
-        sentences, companies_by_index = split_news_on_companies(text, dictionary_companies, all_tickers, dictionary_companies_by_ticker)
+        sentences, companies_by_index = split_news_on_companies(text,
+                                                                dictionary_companies,
+                                                                all_tickers,
+                                                                dictionary_companies_by_ticker)
 
         comp_ids_to_text = dict()
         for key in companies_by_index:
@@ -70,9 +75,8 @@ def score_texts(
         result.append(buf)
     return result
 
+# %%
 
-#%%
+# %%
 
-#%%
-
-#%%
+# %%
